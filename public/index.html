@@ -382,6 +382,14 @@
   }
   .detail-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
   .detail-overlay.open .detail-panel { transform: translateX(0); }
+  .dp-close {
+    display: none; position: sticky; top: 0; z-index: 5;
+    padding: 12px 16px;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    font-size: 13px; font-weight: 510; color: var(--text-m);
+    cursor: pointer;
+  }
+  .dp-close:hover { color: var(--text); }
   .dp-header { padding: 20px 24px 0; flex-shrink: 0; }
   .dp-status {
     display: inline-flex; align-items: center; gap: 5px;
@@ -450,6 +458,50 @@
     font-size: 10px; color: var(--text-g); font-weight: 500;
     margin-top: 8px; letter-spacing: 0.5px;
   }
+
+  /* ═══ MOBILE ═══ */
+  @media (max-width: 768px) {
+    .nav { padding: 12px 16px; }
+    .nav-name { font-size: 13px; }
+    .nav-link { display: none; }
+    .nav-right { gap: 10px; }
+
+    .hero { padding: 0 20px; }
+    .hero h1 { font-size: 32px; letter-spacing: -1px; }
+    .hero-sub { font-size: 14px; }
+
+    .board-layer { padding: 56px 8px 8px; }
+    .app-window { height: calc(100vh - 64px); border-radius: 10px; }
+
+    .sidebar { display: none; }
+
+    .board { gap: 6px; padding: 6px; overflow-x: auto; }
+    .col { width: 160px; min-width: 160px; border-radius: 8px; }
+    .col-head { padding: 7px 8px 5px; }
+    .col-name { font-size: 11px; }
+    .card { padding: 8px; }
+    .card-title { font-size: 12px; }
+    .tag { font-size: 8px; padding: 1px 5px; }
+    .agent-badge { font-size: 8px; padding: 1px 5px; }
+    .card-activity { display: none; }
+    .card-progress { display: none; }
+
+    .detail-panel { width: 100%; max-width: 100%; }
+    .dp-close { display: block; }
+    .dp-title { font-size: 16px; }
+    .dp-term-body { font-size: 10px; }
+    .tl { font-size: 10px; }
+    .tl-ts { font-size: 9px; }
+
+    .progress { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 26px; }
+    .hero-badge { font-size: 10px; padding: 4px 10px; }
+    .col { width: 140px; min-width: 140px; }
+    .card-title { font-size: 11px; }
+  }
 </style>
 </head>
 <body>
@@ -475,7 +527,7 @@
   </div>
   <div class="nav-right">
     <a class="nav-link" href="https://x.com/LiaoranLabs" target="_blank">Twitter</a>
-    <a class="nav-link" href="https://github.com/liaoranlabs" target="_blank">GitHub</a>
+    <a class="nav-link" href="https://github.com/LiaoranLabs" target="_blank">GitHub</a>
     <button class="lang-toggle">中文 / EN</button>
   </div>
 </nav>
@@ -486,6 +538,10 @@
     <!-- Hero layer — on top, fades out -->
     <div class="hero" id="hero">
       <div class="hero-badge"><span class="badge-dot"></span> <span data-i18n="badge">Early Access — Coming Soon</span></div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
+        <img src="logo.svg" alt="Liaoran" style="width:96px;height:96px" />
+        <span style="font-size:36px;font-weight:800;letter-spacing:-1px">Liaoran 了然</span>
+      </div>
       <h1 data-i18n="headline">AI Board.<br><span class="gradient">Crystal Clear.</span></h1>
       <p class="hero-sub" data-i18n="subtitle">AI agents on your board.<br>Tasks, orders, marketing, code, and more.</p>
       <div class="scroll-cue" data-i18n="scroll">↓ Scroll to explore</div>
@@ -735,9 +791,9 @@
       <div class="dp-body">
         <div class="dp-section-label">Description</div>
         <div class="dp-desc">Follow us on GitHub to get notified when we release. Be the first to know when Liaoran goes live.</div>
-        <a class="dp-cta-link" href="https://github.com/liaoranlabs" target="_blank">
+        <a class="dp-cta-link" href="https://github.com/LiaoranLabs" target="_blank">
           <div class="dp-cta-icon icon-gh"><img src="github.svg" alt="GitHub" /></div>
-          <div class="dp-cta-text"><strong>liaoranlabs</strong><span>Follow on GitHub</span></div>
+          <div class="dp-cta-text"><strong>LiaoranLabs</strong><span>Follow on GitHub</span></div>
           <span class="dp-cta-arrow">→</span>
         </a>
       </div>`,
@@ -796,7 +852,8 @@
 
     if (openDetail && detailContent[openDetail]) {
       overlay.classList.add('open');
-      panel.innerHTML = detailContent[openDetail];
+      panel.innerHTML = '<div class="dp-close" id="dpClose">← Back</div>' + detailContent[openDetail];
+      document.getElementById('dpClose').addEventListener('click', closeDetail);
     } else {
       overlay.classList.remove('open');
       panel.innerHTML = '';
