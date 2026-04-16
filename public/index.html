@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liaoran — Your AI Team, Your Local Board</title>
+<meta name="description" content="A local-first project board where AI agents work alongside you — handling daily tasks, processing orders, running marketing campaigns, writing code, and more.">
+<meta property="og:title" content="Liaoran — Your AI Team, Your Local Board">
+<meta property="og:description" content="A local-first project board where AI agents work alongside you.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://liaoran.com">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0f1011;
+    --bg-deep: #08090a;
+    --surface: #141516;
+    --border: rgba(255,255,255,0.06);
+    --border-s: rgba(255,255,255,0.1);
+    --text: #f7f8f8;
+    --text-sec: #d0d6e0;
+    --text-m: #8a8f98;
+    --text-f: #62666d;
+    --text-g: #3a3d42;
+    --pri: #5e6ad2;
+    --pri-b: #7170ff;
+    --gold: #fab707;
+    --green: #10b981;
+    --amber: #f59e0b;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ═══ NAV ═══ */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 40px;
+    background: rgba(8,9,10,0.75);
+    backdrop-filter: blur(20px) saturate(1.4);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-left { display: flex; align-items: center; gap: 10px; }
+  .nav-logo { width: 26px; height: 26px; }
+  .nav-name { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-link { font-size: 13px; font-weight: 500; color: var(--text-f); text-decoration: none; transition: color 0.2s; }
+  .nav-link:hover { color: var(--text); }
+  .lang-toggle {
+    font-size: 11px; font-weight: 600; color: var(--text-f);
+    background: none; border: 1px solid var(--border-s);
+    border-radius: 6px; padding: 4px 10px; cursor: pointer; transition: all 0.2s;
+  }
+  .lang-toggle:hover { border-color: rgba(255,255,255,0.2); color: var(--text-m); }
+
+  /* ═══ SINGLE SCROLL DRIVER — hero + board phases all in one ═══ */
+  .scroll-driver {
+    height: 700vh;
+    position: relative;
+  }
+  .sticky-viewport {
+    position: sticky; top: 0;
+    height: 100vh; width: 100vw;
+    overflow: hidden;
+  }
+
+  /* ═══ HERO (overlaid, fades out) ═══ */
+  .hero {
+    position: absolute; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 0 40px;
+    transition: opacity 0.4s, transform 0.4s;
+    pointer-events: auto;
+  }
+  .hero.hidden {
+    opacity: 0; transform: translateY(-30px);
+    pointer-events: none;
+  }
+  .hero::before {
+    content: ''; position: absolute;
+    top: -100px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 500px;
+    background: radial-gradient(ellipse, rgba(94,106,210,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 600; color: var(--gold);
+    background: rgba(250,183,7,0.06); border: 1px solid rgba(250,183,7,0.12);
+    border-radius: 999px; padding: 5px 14px; margin-bottom: 20px;
+  }
+  .badge-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: pulse 2s infinite; }
+  .hero h1 {
+    font-size: 52px; font-weight: 800; letter-spacing: -2px;
+    line-height: 1.08; max-width: 650px; margin-bottom: 14px;
+  }
+  .gradient {
+    background: linear-gradient(135deg, #7170ff, #0e6cb4, #fab707);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero-sub { font-size: 16px; color: var(--text-f); max-width: 460px; line-height: 1.7; }
+  .scroll-cue {
+    margin-top: 32px; font-size: 12px; color: var(--text-g);
+    animation: bounce 2s infinite;
+  }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
+
+  /* ═══ BOARD LAYER (behind hero, revealed when hero fades) ═══ */
+  .board-layer {
+    position: absolute; inset: 0;
+    padding: 60px 40px 12px; /* top padding for nav */
+    display: flex; align-items: flex-start; justify-content: center;
+    opacity: 0; transform: translateY(20px) scale(0.98);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+  .board-layer.visible {
+    opacity: 1; transform: translateY(0) scale(1);
+  }
+
+  .app-window {
+    width: 100%; max-width: 1140px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 20px 60px rgba(0,0,0,0.4);
+    display: flex; flex-direction: column;
+    height: calc(100vh - 72px);
+  }
+  .app-titlebar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 16px; background: rgba(255,255,255,0.015);
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; } .dot-y { background: #febc2e; } .dot-g { background: #28c840; }
+  .titlebar-text { flex: 1; text-align: center; font-size: 13px; font-weight: 600; color: var(--text-g); }
+
+  .app-body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px; flex-shrink: 0;
+    border-right: 1px solid var(--border); padding: 12px 10px;
+    overflow-y: auto;
+  }
+  .sb-label { font-size: 11px; font-weight: 700; color: var(--text-g); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; padding: 0 8px; }
+  .sb-group { margin-bottom: 16px; }
+  .sb-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 8px; border-radius: 5px;
+    font-size: 14px; font-weight: 510; color: var(--text-f); margin-bottom: 1px;
+  }
+  .sb-item.active { background: rgba(255,255,255,0.04); color: var(--text-sec); }
+  .sb-dot { width: 7px; height: 7px; border-radius: 3px; }
+  .sb-dot.blue { background: rgba(94,106,210,0.5); }
+  .sb-dot.green { background: rgba(16,185,129,0.5); }
+  .sb-dot.gray { background: rgba(255,255,255,0.08); }
+  .agent-panel { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .agent-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 4px 8px; font-size: 13px; font-weight: 510; color: var(--text-f); margin-bottom: 2px;
+  }
+  .ag-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .ag-dot.idle { background: var(--text-g); }
+  .ag-dot.busy { background: var(--amber); animation: pulse 2s infinite; }
+  .ag-dot.on { background: var(--green); }
+
+  /* Board */
+  .board {
+    flex: 1; display: flex; gap: 10px; padding: 12px;
+    overflow: hidden; position: relative;
+  }
+  .col {
+    width: 220px; flex-shrink: 0;
+    background: rgba(255,255,255,0.012);
+    border: 1px solid var(--border); border-radius: 10px;
+    display: flex; flex-direction: column; max-height: 100%;
+  }
+  .col-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 11px 7px; flex-shrink: 0;
+  }
+  .col-name { font-size: 13px; font-weight: 600; color: var(--text-m); }
+  .col-cnt {
+    font-size: 10px; color: var(--text-g);
+    background: rgba(255,255,255,0.04); padding: 1px 6px; border-radius: 999px;
+    transition: all 0.3s;
+  }
+  .col-cards { flex: 1; padding: 0 5px 5px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+
+  /* Cards */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 7px; padding: 10px; position: relative;
+    transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+    cursor: default;
+  }
+  .card-title { font-size: 14px; font-weight: 510; color: var(--text-sec); margin-bottom: 6px; line-height: 1.4; }
+  .card-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .s-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .tag-blue { background: rgba(94,106,210,0.12); color: var(--pri-b); }
+  .tag-green { background: rgba(16,185,129,0.12); color: var(--green); }
+  .tag-amber { background: rgba(245,158,11,0.12); color: var(--amber); }
+  .agent-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: rgba(245,158,11,0.08); color: var(--amber);
+  }
+  .micro { width: 4px; height: 4px; background: var(--amber); border-radius: 50%; animation: pulse 1.5s infinite; }
+  .card.dim { opacity: 0.55; }
+
+  /* Agent activity on cards */
+  .card-activity {
+    margin-top: 8px; padding-top: 7px;
+    border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .activity-line {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--text-f);
+    opacity: 0; transform: translateY(4px);
+    transition: all 0.4s ease-out;
+  }
+  .activity-line.show { opacity: 1; transform: translateY(0); }
+  .act-icon {
+    width: 14px; height: 14px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; flex-shrink: 0;
+  }
+  .act-icon.green { background: rgba(16,185,129,0.15); color: var(--green); }
+  .act-icon.amber { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .act-icon.blue { background: rgba(94,106,210,0.15); color: var(--pri-b); }
+
+  /* Typing indicator */
+  .typing {
+    display: inline-flex; gap: 3px; align-items: center; padding: 3px 0;
+  }
+  .typing-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--text-g);
+    animation: typingBounce 1.4s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce {
+    0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-3px); opacity: 1; }
+  }
+
+  /* Progress bar on card */
+  .card-progress {
+    margin-top: 6px;
+    height: 3px; border-radius: 2px;
+    background: rgba(255,255,255,0.04);
+    overflow: hidden;
+  }
+  .card-progress-bar {
+    height: 100%; border-radius: 2px;
+    transition: width 2s ease-out;
+  }
+  .card-progress-bar.amber { background: var(--amber); }
+  .card-progress-bar.green { background: var(--green); }
+  .card-progress-bar.blue { background: var(--pri-b); }
+
+  /* ═══ TERMINAL INSIDE DETAIL PANEL ═══ */
+  .dp-terminal {
+    margin: 16px 0 0;
+    background: #09090f;
+    border: 1px solid #27272a;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .dp-term-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px;
+    background: #0c0c14;
+    border-bottom: 1px solid #27272a;
+  }
+  .dp-term-icon { color: #22c55e; font-size: 12px; }
+  .dp-term-title {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+    font-size: 11px; color: #e4e4e7;
+  }
+  .dp-term-badge {
+    margin-left: auto;
+    font-family: 'SF Mono', ui-monospace, monospace;
+    font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(94,106,210,0.2); color: var(--pri-b);
+  }
+  .dp-term-spin {
+    width: 8px; height: 8px; border: 1.5px solid transparent;
+    border-top-color: #22c55e; border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .dp-term-body {
+    padding: 10px 14px;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+    font-size: 12px; line-height: 1.7;
+    overflow: hidden;
+  }
+  .tl { margin-bottom: 2px; display: flex; gap: 6px; }
+  .tl-ts { color: #52525b; font-size: 10px; user-select: none; flex-shrink: 0; }
+  .tl-dollar { color: #22c55e; font-weight: 700; }
+  .tl-tool { color: #60a5fa; }
+  .tl-args { color: #86efac; }
+  .tl-out { color: #a1a1aa; padding-left: 18px; margin-bottom: 2px; }
+  .tl-out.ok { color: #86efac; }
+  .tl-out.err { color: #f87171; }
+  .tl-info {
+    border-left: 2px solid rgba(234,179,8,0.3);
+    padding-left: 10px; color: rgba(254,240,138,0.9);
+    margin-bottom: 2px;
+  }
+  .tl-cursor {
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .tl-cursor .tl-dollar { animation: pulse 2s infinite; }
+  .tl-blink {
+    display: inline-block; width: 7px; height: 14px;
+    background: #22c55e; animation: blink 1s step-end infinite; opacity: 0.6;
+  }
+  @keyframes blink { 0%,100%{opacity:0.6} 50%{opacity:0} }
+
+  /* CTA cards */
+  .cta-card {
+    opacity: 0; max-height: 0; padding: 0 10px; overflow: hidden;
+    border-color: transparent; margin: 0; transition: none;
+  }
+  .cta-card.creating {
+    animation: cardCreate 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+  @keyframes cardCreate {
+    0% { opacity: 0; max-height: 0; padding: 0 10px; border-color: transparent; transform: scale(0.95); }
+    100% { opacity: 1; max-height: 60px; padding: 10px; border-color: var(--border); transform: scale(1); }
+  }
+  .cta-card.cta-x { border-color: rgba(94,106,210,0.15); background: rgba(94,106,210,0.03); }
+  .cta-card.cta-gh { border-color: rgba(94,106,210,0.15); background: rgba(94,106,210,0.03); }
+  .cta-card.cta-wl { border-color: rgba(250,183,7,0.15); background: rgba(250,183,7,0.03); }
+  .cta-card.creating { cursor: pointer; }
+  .cta-card.creating:hover { filter: brightness(1.15); }
+
+  /* Detail panel */
+  .detail-overlay {
+    position: absolute; inset: 0; z-index: 10;
+    background: rgba(0,0,0,0); pointer-events: none;
+    transition: background 0.3s;
+  }
+  .detail-overlay.open { background: rgba(0,0,0,0.35); pointer-events: all; }
+  .detail-panel {
+    position: absolute; top: 0; right: 0; bottom: 0;
+    width: 420px; max-width: 80%;
+    background: var(--bg); border-left: 1px solid var(--border);
+    transform: translateX(100%);
+    transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+    display: flex; flex-direction: column; overflow-y: auto; z-index: 11;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.08) transparent;
+  }
+  .detail-panel::-webkit-scrollbar { width: 6px; }
+  .detail-panel::-webkit-scrollbar-track { background: transparent; }
+  .detail-panel::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+  }
+  .detail-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+  .detail-overlay.open .detail-panel { transform: translateX(0); }
+  .dp-header { padding: 20px 24px 0; flex-shrink: 0; }
+  .dp-status {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; margin-bottom: 12px;
+  }
+  .dp-status.ready { background: rgba(94,106,210,0.12); color: var(--pri-b); }
+  .dp-status.gold { background: rgba(250,183,7,0.12); color: var(--gold); }
+  .dp-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .dp-labels { display: flex; gap: 5px; margin-bottom: 16px; }
+  .dp-label { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .dp-sep { height: 1px; background: var(--border); margin: 0 24px; }
+  .dp-body { padding: 20px 24px; flex: 1; }
+  .dp-section-label { font-size: 10px; font-weight: 700; color: var(--text-g); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .dp-desc { font-size: 13px; color: var(--text-f); line-height: 1.7; margin-bottom: 20px; }
+
+  .dp-cta-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 18px; border-radius: 10px;
+    background: rgba(94,106,210,0.06); border: 1px solid rgba(94,106,210,0.15);
+    text-decoration: none; transition: all 0.2s; margin-bottom: 12px;
+  }
+  .dp-cta-link:hover { background: rgba(94,106,210,0.1); border-color: rgba(94,106,210,0.3); }
+  .dp-cta-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0; background: rgba(255,255,255,0.06);
+  }
+  .dp-cta-text strong { font-size: 14px; font-weight: 600; color: var(--text-sec); display: block; }
+  .dp-cta-text span { font-size: 12px; color: var(--text-f); }
+  .dp-cta-arrow { margin-left: auto; font-size: 16px; color: var(--text-g); }
+
+  .dp-waitlist-form { display: flex; gap: 8px; margin-top: 16px; }
+  .dp-wl-input {
+    flex: 1; height: 40px;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border-s);
+    border-radius: 8px; padding: 0 14px;
+    font-size: 13px; font-family: inherit; color: var(--text); outline: none; transition: all 0.2s;
+  }
+  .dp-wl-input::placeholder { color: var(--text-g); }
+  .dp-wl-input:focus { border-color: rgba(250,183,7,0.4); box-shadow: 0 0 0 3px rgba(250,183,7,0.1); }
+  .dp-wl-btn {
+    height: 40px; padding: 0 20px;
+    background: var(--gold); color: #000; border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .dp-wl-btn:hover { background: #ffc520; }
+  .dp-wl-note { font-size: 11px; color: var(--text-g); margin-top: 10px; }
+
+  /* Progress dots */
+  .progress {
+    position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
+    z-index: 100; display: flex; flex-direction: column; gap: 6px; align-items: center;
+  }
+  .pdot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--text-g); transition: all 0.3s;
+  }
+  .pdot.active { background: var(--pri-b); width: 5px; height: 16px; border-radius: 3px; }
+  .pdot.done { background: var(--green); }
+  .progress-label {
+    writing-mode: vertical-rl; text-orientation: mixed;
+    font-size: 10px; color: var(--text-g); font-weight: 500;
+    margin-top: 8px; letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Progress -->
+<div class="progress" id="progress">
+  <div class="pdot active" id="p0"></div>
+  <div class="pdot" id="p1"></div>
+  <div class="pdot" id="p2"></div>
+  <div class="pdot" id="p3"></div>
+  <div class="pdot" id="p4"></div>
+  <div class="pdot" id="p5"></div>
+  <div class="pdot" id="p6"></div>
+  <div class="pdot" id="p7"></div>
+  <span class="progress-label" id="pLabel">scroll ↓</span>
+</div>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <div class="nav-left">
+    <img class="nav-logo" src="logo.svg" alt="Liaoran" />
+    <span class="nav-name">Liaoran</span>
+  </div>
+  <div class="nav-right">
+    <a class="nav-link" href="https://x.com/LiaoranLabs" target="_blank">Twitter</a>
+    <a class="nav-link" href="https://github.com/liaoranlabs" target="_blank">GitHub</a>
+    <button class="lang-toggle">中文 / EN</button>
+  </div>
+</nav>
+
+<!-- ═══ EVERYTHING IN ONE SCROLL DRIVER ═══ -->
+<div class="scroll-driver">
+  <div class="sticky-viewport">
+    <!-- Hero layer — on top, fades out -->
+    <div class="hero" id="hero">
+      <div class="hero-badge"><span class="badge-dot"></span> Early Access — Coming Soon</div>
+      <h1>Your AI Team,<br><span class="gradient">Your Local Board</span></h1>
+      <p class="hero-sub">A local-first project board where AI agents work alongside you — handling daily tasks, processing orders, running marketing campaigns, writing code, and more.</p>
+      <div class="scroll-cue">↓ Scroll to explore</div>
+    </div>
+
+    <!-- Board layer — behind hero, revealed -->
+    <div class="board-layer" id="boardLayer">
+      <div class="app-window">
+        <div class="app-titlebar">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <div class="titlebar-text">Liaoran — Sprint 24</div>
+          <div style="width:44px"></div>
+        </div>
+        <div class="app-body">
+          <div class="sidebar">
+            <div class="sb-group">
+              <div class="sb-label">Projects</div>
+              <div class="sb-item active"><span class="sb-dot blue"></span> Liaoran</div>
+              <div class="sb-item"><span class="sb-dot green"></span> Side Project</div>
+            </div>
+            <div class="sb-group">
+              <div class="sb-label">Boards</div>
+              <div class="sb-item active"><span class="sb-dot gray"></span> Sprint 24</div>
+              <div class="sb-item"><span class="sb-dot gray"></span> Backlog</div>
+            </div>
+            <div class="agent-panel">
+              <div class="sb-label">Agents</div>
+              <div class="agent-row"><span class="ag-dot busy"></span> OrderBot — working</div>
+              <div class="agent-row"><span class="ag-dot on"></span> MarketBot — ready</div>
+              <div class="agent-row"><span class="ag-dot idle"></span> SupportBot — idle</div>
+            </div>
+          </div>
+          <div class="board" id="board">
+            <div class="col">
+              <div class="col-head"><span class="col-name">Todo</span><span class="col-cnt" id="todoCnt">0</span></div>
+              <div class="col-cards" id="todoCards">
+                <div class="card cta-card cta-x" id="c1">
+                  <div class="card-title">Follow @LiaoranLabs</div>
+                  <div class="card-meta"><span class="s-dot" style="background:var(--pri)"></span><span class="tag tag-blue">community</span></div>
+                </div>
+                <div class="card cta-card cta-gh" id="c2">
+                  <div class="card-title">Follow us on GitHub</div>
+                  <div class="card-meta"><span class="s-dot" style="background:var(--pri)"></span><span class="tag tag-blue">community</span></div>
+                </div>
+                <div class="card cta-card cta-wl" id="c3">
+                  <div class="card-title">Join the waitlist</div>
+                  <div class="card-meta"><span class="s-dot" style="background:var(--gold)"></span><span class="tag tag-amber">early access</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="col-head"><span class="col-name">In Progress</span><span class="col-cnt">2</span></div>
+              <div class="col-cards">
+                <div class="card" id="codeCard" style="cursor:pointer;opacity:0.55;transition:all 0.3s">
+                  <div class="card-title">Implement user auth API</div>
+                  <div class="card-meta"><span class="s-dot" style="background:var(--amber);animation:pulse 2s infinite"></span><span class="tag tag-amber">feature</span><span class="agent-badge"><span class="micro"></span>CodeBot</span></div>
+                  <div class="card-progress"><div class="card-progress-bar amber" id="prog1" style="width:0%"></div></div>
+                  <div class="card-activity">
+                    <div class="activity-line" id="al1"><span class="act-icon green">✓</span> Created auth routes</div>
+                    <div class="activity-line" id="al2"><span class="act-icon green">✓</span> Added JWT middleware</div>
+                    <div class="activity-line" id="al3"><span class="act-icon amber">⚙</span> Running tests... <span class="typing"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span></div>
+                  </div>
+                </div>
+                <div class="card dim" id="ipCard2">
+                  <div class="card-title">Schedule social media posts</div>
+                  <div class="card-meta"><span class="s-dot" style="background:var(--amber);animation:pulse 2s infinite"></span><span class="tag tag-blue">marketing</span><span class="agent-badge"><span class="micro"></span>MarketBot</span></div>
+                  <div class="card-activity">
+                    <div class="activity-line" id="al4"><span class="act-icon blue">→</span> Drafting 5 posts for this week</div>
+                    <div class="activity-line" id="al5"><span class="act-icon green">✓</span> 2/5 scheduled</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="col-head"><span class="col-name">Review</span><span class="col-cnt">1</span></div>
+              <div class="col-cards">
+                <div class="card dim" id="rvCard1">
+                  <div class="card-title">Weekly sales report</div>
+                  <div class="card-meta"><span class="s-dot" style="background:var(--pri-b)"></span><span class="tag tag-green">report</span></div>
+                  <div class="card-activity">
+                    <div class="activity-line" id="al6"><span class="act-icon green">✓</span> Report generated — awaiting review</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <div class="col-head"><span class="col-name">Done</span><span class="col-cnt">3</span></div>
+              <div class="col-cards">
+                <div class="card dim"><div class="card-title">Reply customer inquiries</div><div class="card-meta"><span class="s-dot" style="background:var(--green)"></span><span class="tag tag-green">support</span></div><div class="card-activity"><div class="activity-line show"><span class="act-icon green">✓</span> 8 replies sent by SupportBot</div></div></div>
+                <div class="card dim"><div class="card-title">Update inventory data</div><div class="card-meta"><span class="s-dot" style="background:var(--green)"></span><span class="tag tag-blue">ops</span></div><div class="card-activity"><div class="activity-line show"><span class="act-icon green">✓</span> 142 items synced</div></div></div>
+                <div class="card dim"><div class="card-title">Send campaign emails</div><div class="card-meta"><span class="s-dot" style="background:var(--green)"></span></div><div class="card-activity"><div class="activity-line show"><span class="act-icon green">✓</span> 2,400 emails delivered</div></div></div>
+              </div>
+            </div>
+            <div class="detail-overlay" id="detailOverlay">
+              <div class="detail-panel" id="detailPanel"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const hero = document.getElementById('hero');
+  const boardLayer = document.getElementById('boardLayer');
+  const c1 = document.getElementById('c1');
+  const c2 = document.getElementById('c2');
+  const c3 = document.getElementById('c3');
+  const codeCard = document.getElementById('codeCard');
+  const todoCnt = document.getElementById('todoCnt');
+  const overlay = document.getElementById('detailOverlay');
+  const panel = document.getElementById('detailPanel');
+
+  let cardsVisible = 0;
+  let openDetail = null;
+  let heroHidden = false;
+  let scrollPhase = -1;
+  let clickOverride = false;
+
+  const cards = [c1, c2, c3];
+  const cardKeys = ['x', 'gh', 'wl'];
+  const cardBorderColors = [
+    'rgba(94,106,210,0.35)',
+    'rgba(94,106,210,0.35)',
+    'rgba(250,183,7,0.35)'
+  ];
+
+  const detailContent = {
+    code: `
+      <div class="dp-header">
+        <div class="dp-title" style="font-size:18px;margin-bottom:8px">Implement user auth API</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+          <div style="display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 10px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:12px;font-weight:510;color:var(--text-m)">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--amber)"></span> In Progress
+          </div>
+        </div>
+      </div>
+      <div class="dp-sep"></div>
+      <div class="dp-body">
+        <div class="dp-section-label">Description</div>
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:13px;color:var(--text-f);line-height:1.7;margin-bottom:16px">
+          Add JWT-based authentication with login/register endpoints. Include password hashing with bcrypt, token refresh flow, and auth middleware guard for protected routes.
+        </div>
+        <div class="dp-section-label">Labels</div>
+        <div style="display:flex;gap:5px;margin-bottom:16px">
+          <span style="background:rgba(245,158,11,0.12);color:var(--amber);font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px">feature</span>
+          <span style="background:rgba(94,106,210,0.12);color:var(--pri-b);font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px">backend</span>
+          <span style="background:rgba(16,185,129,0.12);color:var(--green);font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px">auth</span>
+        </div>
+        <div class="dp-section-label">Members</div>
+        <div style="display:flex;gap:6px;margin-bottom:16px;align-items:center">
+          <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:999px;padding:3px 10px 3px 4px;font-size:11px;font-weight:510;color:var(--text-m)">
+            <span style="width:20px;height:20px;border-radius:50%;background:var(--pri);display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff">B</span> CodeBot
+          </span>
+        </div>
+        <div class="dp-section-label" style="display:flex;align-items:center;gap:5px">Agent Activity</div>
+        <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.015)">
+            <span class="dp-term-spin" style="width:14px;height:14px;border-width:2px;flex-shrink:0"></span>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+                <span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:999px;background:rgba(94,106,210,0.15);color:var(--pri-b)">RUNNING</span>
+                <span style="font-size:10px;color:var(--text-g)">Started 2 min ago</span>
+              </div>
+              <div style="font-size:11px;color:var(--text-sec)">Implementing JWT auth endpoints</div>
+              <div style="font-size:10px;color:var(--text-g);margin-top:2px">12 turns · 48K tokens · $0.04</div>
+            </div>
+            <span style="font-size:11px;color:var(--text-g)">▾</span>
+          </div>
+          <div style="border-top:1px solid var(--border)">
+            <div class="dp-terminal" style="margin:0;border:none;border-radius:0">
+              <div class="dp-term-header">
+                <span class="dp-term-icon">⌘</span>
+                <span class="dp-term-title">[CodeBot]</span>
+                <span class="dp-term-badge"><span class="dp-term-spin"></span> RUNNING</span>
+              </div>
+              <div class="dp-term-body">
+                <div class="tl"><span class="tl-ts">14:02</span><span class="tl-dollar">$</span> <span class="tl-tool">file_read</span> <span class="tl-args">src/server/routes/index.ts</span></div>
+                <div class="tl-out">Read 42 lines — found existing route structure</div>
+                <div class="tl"><span class="tl-ts">14:02</span><span class="tl-dollar">$</span> <span class="tl-tool">file_create</span> <span class="tl-args">src/server/routes/auth.ts</span></div>
+                <div class="tl-out ok">✓ Created auth routes — login, register, refresh</div>
+                <div class="tl"><span class="tl-ts">14:03</span><span class="tl-dollar">$</span> <span class="tl-tool">file_create</span> <span class="tl-args">src/server/middleware/guard.ts</span></div>
+                <div class="tl-out ok">✓ Created JWT verification middleware</div>
+                <div class="tl"><span class="tl-ts">14:03</span><span class="tl-dollar">$</span> <span class="tl-tool">file_edit</span> <span class="tl-args">src/server/routes/index.ts</span></div>
+                <div class="tl-out ok">✓ Registered auth routes in main router</div>
+                <div class="tl"><span class="tl-ts">14:04</span><span class="tl-dollar">$</span> <span class="tl-tool">shell</span> <span class="tl-args">npm test -- --filter=auth</span></div>
+                <div class="tl-info">Running 6 test cases...</div>
+                <div class="tl-out ok">✓ 6/6 tests passed (1.2s)</div>
+                <div class="tl"><span class="tl-ts">14:04</span><span class="tl-dollar">$</span> <span class="tl-tool">shell</span> <span class="tl-args">git commit -m "feat: add JWT auth API"</span></div>
+                <div class="tl-out ok">✓ Committed — 3 files changed, +148 lines</div>
+                <div class="tl-cursor"><span class="tl-dollar">$</span> <span class="tl-blink"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dp-section-label" style="display:flex;align-items:center;gap:5px">Comments <span style="font-size:10px;padding:1px 6px;border-radius:999px;background:rgba(255,255,255,0.05);color:var(--text-g);margin-left:4px">2</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:8px;padding:10px;border-radius:8px;border:1px solid rgba(94,106,210,0.15);background:rgba(94,106,210,0.03)">
+            <span style="width:24px;height:24px;border-radius:50%;background:var(--pri);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">B</span>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+                <span style="font-size:12px;font-weight:600;color:var(--text-sec)">CodeBot</span>
+                <span style="font-size:9px;padding:0 4px;border-radius:4px;border:1px solid var(--border);color:var(--text-g)">bot</span>
+                <span style="font-size:10px;color:var(--text-g)">2 min ago</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-f);line-height:1.6">Auth API implemented. Created 3 files: auth routes, JWT middleware, and updated the main router. All 6 tests passing.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)">
+            <span style="width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-m);flex-shrink:0">Y</span>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+                <span style="font-size:12px;font-weight:600;color:var(--text-sec)">You</span>
+                <span style="font-size:10px;color:var(--text-g)">1 min ago</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-f);line-height:1.6">Looks good! Can you also add rate limiting to the login endpoint?</div>
+            </div>
+          </div>
+        </div>
+      </div>`,
+    x: `
+      <div class="dp-header">
+        <div class="dp-status ready"><span class="s-dot" style="background:var(--pri-b)"></span> Ready</div>
+        <div class="dp-title">Follow @LiaoranLabs</div>
+        <div class="dp-labels"><span class="dp-label" style="background:rgba(94,106,210,0.12);color:var(--pri-b)">community</span></div>
+      </div>
+      <div class="dp-sep"></div>
+      <div class="dp-body">
+        <div class="dp-section-label">Description</div>
+        <div class="dp-desc">Stay in the loop. We share updates on new features, AI agent capabilities, and the roadmap.</div>
+        <a class="dp-cta-link" href="https://x.com/LiaoranLabs" target="_blank">
+          <div class="dp-cta-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
+          <div class="dp-cta-text"><strong>@LiaoranLabs</strong><span>Follow on X (Twitter)</span></div>
+          <span class="dp-cta-arrow">→</span>
+        </a>
+      </div>`,
+    gh: `
+      <div class="dp-header">
+        <div class="dp-status ready"><span class="s-dot" style="background:var(--pri-b)"></span> Ready</div>
+        <div class="dp-title">Follow us on GitHub</div>
+        <div class="dp-labels"><span class="dp-label" style="background:rgba(94,106,210,0.12);color:var(--pri-b)">community</span></div>
+      </div>
+      <div class="dp-sep"></div>
+      <div class="dp-body">
+        <div class="dp-section-label">Description</div>
+        <div class="dp-desc">Follow us on GitHub to get notified when we release. Be the first to know when Liaoran goes live.</div>
+        <a class="dp-cta-link" href="https://github.com/liaoranlabs" target="_blank">
+          <div class="dp-cta-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div>
+          <div class="dp-cta-text"><strong>liaoranlabs</strong><span>Follow on GitHub</span></div>
+          <span class="dp-cta-arrow">→</span>
+        </a>
+      </div>`,
+    wl: `
+      <div class="dp-header">
+        <div class="dp-status gold"><span class="s-dot" style="background:var(--gold)"></span> Early Access</div>
+        <div class="dp-title">Join the Waitlist</div>
+        <div class="dp-labels"><span class="dp-label" style="background:rgba(250,183,7,0.12);color:var(--gold)">early access</span></div>
+      </div>
+      <div class="dp-sep"></div>
+      <div class="dp-body">
+        <div class="dp-section-label">Description</div>
+        <div class="dp-desc">Be the first to experience Liaoran. AI agents that handle your daily tasks — orders, marketing, support, development, and more. Free during the preview period.</div>
+        <div class="dp-section-label">Sign Up</div>
+        <div class="dp-waitlist-form">
+          <input class="dp-wl-input" type="email" placeholder="you@email.com" />
+          <button class="dp-wl-btn">Join</button>
+        </div>
+        <div class="dp-wl-note">Free during early access · No credit card required</div>
+      </div>`
+  };
+
+  // ── Animate agent activities ──
+  let activitiesStarted = false;
+  function startActivities() {
+    if (activitiesStarted) return;
+    activitiesStarted = true;
+    const lines = ['al1','al2','al3','al4','al5','al6'];
+    lines.forEach((id, i) => {
+      setTimeout(() => { const el = document.getElementById(id); if (el) el.classList.add('show'); }, 600 + i * 500);
+    });
+    setTimeout(() => { const b = document.getElementById('prog1'); if (b) b.style.width = '65%'; }, 800);
+    setTimeout(() => { const b = document.getElementById('prog1'); if (b) b.style.width = '85%'; }, 3500);
+  }
+
+  // ── Render ──
+  function render() {
+    if (heroHidden) { hero.classList.add('hidden'); boardLayer.classList.add('visible'); startActivities(); }
+    else { hero.classList.remove('hidden'); boardLayer.classList.remove('visible'); }
+
+    cards.forEach((c, i) => {
+      if (i < cardsVisible) c.classList.add('creating'); else c.classList.remove('creating');
+      c.style.borderColor = (openDetail === cardKeys[i]) ? cardBorderColors[i] : '';
+    });
+
+    // Highlight code card in In Progress
+    if (openDetail === 'code') {
+      codeCard.style.opacity = '1';
+      codeCard.style.borderColor = 'rgba(245,158,11,0.35)';
+      codeCard.style.boxShadow = '0 0 20px rgba(245,158,11,0.08)';
+    } else {
+      codeCard.style.opacity = '';
+      codeCard.style.borderColor = '';
+      codeCard.style.boxShadow = '';
+    }
+
+    if (openDetail && detailContent[openDetail]) {
+      overlay.classList.add('open');
+      panel.innerHTML = detailContent[openDetail];
+    } else {
+      overlay.classList.remove('open');
+      panel.innerHTML = '';
+    }
+    todoCnt.textContent = cardsVisible;
+  }
+
+  function openCardDetail(key) {
+    openDetail = (openDetail === key) ? null : key;
+    clickOverride = true;
+    render();
+  }
+
+  function closeDetail() { openDetail = null; clickOverride = true; render(); }
+
+  // Click handlers
+  cards.forEach((c, i) => {
+    c.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!c.classList.contains('creating')) return;
+      openCardDetail(cardKeys[i]);
+    });
+  });
+  // Click code card in In Progress
+  codeCard.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openCardDetail('code');
+  });
+
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDetail(); });
+
+  function getPhase(frac) {
+    if (frac < 0.06) return 0;   // hero
+    if (frac < 0.18) return 1;   // board appears (no detail)
+    if (frac < 0.30) return 2;   // all cards visible
+    if (frac < 0.45) return 3;   // x detail
+    if (frac < 0.55) return 4;   // close x
+    if (frac < 0.70) return 5;   // gh detail
+    if (frac < 0.80) return 6;   // close gh
+    return 7;                     // wl detail
+  }
+
+  function applyScrollPhase(phase) {
+    if (phase === scrollPhase) return;
+    scrollPhase = phase;
+    heroHidden = phase >= 1;
+
+    // Show all 3 cards as soon as board appears
+    if (phase >= 2) cardsVisible = 3;
+
+    if (!clickOverride) {
+      if (phase === 3) openDetail = 'x';
+      else if (phase === 5) openDetail = 'gh';
+      else if (phase === 7) openDetail = 'wl';
+      else openDetail = null;
+    }
+
+    if (phase === 2 || phase === 4 || phase === 6) clickOverride = false;
+    if (phase <= 1) clickOverride = false;
+
+    render();
+    updateProgress(phase);
+  }
+
+  function updateProgress(phase) {
+    for (let i = 0; i <= 7; i++) {
+      const d = document.getElementById('p' + i);
+      if (!d) continue;
+      d.className = 'pdot' + (i < phase ? ' done' : i === phase ? ' active' : '');
+    }
+  }
+
+  function onScroll() {
+    const driver = document.querySelector('.scroll-driver');
+    const rect = driver.getBoundingClientRect();
+    const driverH = driver.offsetHeight;
+    const scrolled = -rect.top;
+    const frac = Math.max(0, Math.min(1, scrolled / (driverH - window.innerHeight)));
+    applyScrollPhase(getPhase(frac));
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  requestAnimationFrame(onScroll);
+
+  // ── Waitlist form submission (delegated, since form is rendered dynamically) ──
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.dp-wl-btn');
+    if (!btn) return;
+    const form = btn.closest('.dp-waitlist-form');
+    const input = form && form.querySelector('.dp-wl-input');
+    if (!input) return;
+
+    const email = input.value.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      input.style.borderColor = 'rgba(239,68,68,0.5)';
+      input.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.1)';
+      return;
+    }
+
+    btn.textContent = '...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (res.ok) {
+        input.value = '';
+        btn.textContent = 'Joined!';
+        btn.style.background = 'var(--green)';
+        const note = form.nextElementSibling;
+        if (note) note.textContent = 'You\'re on the list. We\'ll be in touch!';
+      } else {
+        btn.textContent = 'Error';
+        setTimeout(() => { btn.textContent = 'Join'; btn.disabled = false; }, 2000);
+      }
+    } catch {
+      btn.textContent = 'Error';
+      setTimeout(() => { btn.textContent = 'Join'; btn.disabled = false; }, 2000);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
