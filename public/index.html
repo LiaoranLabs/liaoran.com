@@ -466,6 +466,9 @@
     margin-top: 8px; letter-spacing: 0.5px;
   }
 
+  /* Mobile agent strip — hidden on desktop */
+  .mobile-agents { display: none; }
+
   /* ═══ MOBILE ═══ */
   @media (max-width: 768px) {
     .nav { padding: 12px 16px; }
@@ -481,9 +484,20 @@
     .app-window { height: calc(100vh - 64px); border-radius: 10px; }
 
     .sidebar { display: none; }
+    .mobile-agents {
+      display: flex; gap: 10px; padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto; flex-shrink: 0;
+    }
+    .mobile-agents .agent-row { font-size: 11px; white-space: nowrap; }
 
-    .board { gap: 6px; padding: 6px; overflow-x: auto; }
-    .col { width: 160px; min-width: 160px; border-radius: 8px; }
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px; padding: 6px;
+      overflow: hidden;
+    }
+    .col { width: auto; min-width: 0; border-radius: 8px; }
     .col-head { padding: 7px 8px 5px; }
     .col-name { font-size: 11px; }
     .card { padding: 8px; }
@@ -493,6 +507,8 @@
     .card-activity { display: none; }
     .card-progress { display: none; }
 
+    .detail-overlay.open { pointer-events: none; background: none; }
+    .detail-overlay.open .detail-panel { pointer-events: all; }
     .detail-panel { width: 100%; max-width: 100%; }
     .dp-close { display: block; }
     .dp-title { font-size: 16px; }
@@ -506,7 +522,7 @@
   @media (max-width: 480px) {
     .hero h1 { font-size: 26px; }
     .hero-badge { font-size: 10px; padding: 4px 10px; }
-    .col { width: 140px; min-width: 140px; }
+    .col { min-width: 0; }
     .card-title { font-size: 11px; }
   }
 </style>
@@ -561,6 +577,11 @@
           <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
           <div class="titlebar-text" data-i18n="titlebar">Liaoran 了然 — Sprint 42</div>
           <div style="width:44px"></div>
+        </div>
+        <div class="mobile-agents">
+          <div class="agent-row"><span class="ag-dot busy"></span> <span data-i18n="ag1">OrderBot — working</span></div>
+          <div class="agent-row"><span class="ag-dot on"></span> <span data-i18n="ag2">MarketBot — ready</span></div>
+          <div class="agent-row"><span class="ag-dot idle"></span> <span data-i18n="ag3">SupportBot — idle</span></div>
         </div>
         <div class="app-body">
           <div class="sidebar">
@@ -669,7 +690,7 @@
   let openDetail = null;
   let heroHidden = false;
   let scrollPhase = -1;
-  let clickOverride = false;
+  let clickLockUntil = 0;
 
   const cards = [c1, c2, c3];
   const cardKeys = ['x', 'gh', 'wl'];
@@ -869,12 +890,13 @@
   }
 
   function openCardDetail(key) {
-    openDetail = (openDetail === key) ? null : key;
-    clickOverride = true;
+    openDetail = key;
+    clickLockUntil = Date.now() + 800;
+    stepping = false;
     render();
   }
 
-  function closeDetail() { openDetail = null; clickOverride = true; render(); }
+  function closeDetail() { openDetail = null; clickLockUntil = Date.now() + 800; stepping = false; render(); }
 
   // Click handlers
   cards.forEach((c, i) => {
@@ -903,26 +925,38 @@
     return 7;                     // wl detail
   }
 
-  function applyScrollPhase(phase) {
-    if (phase === scrollPhase) return;
+  let stepping = false;
+  let targetPhase = 0;
+
+  function applySinglePhase(phase) {
     scrollPhase = phase;
     heroHidden = phase >= 1;
 
-    // Show all 3 cards as soon as board appears
     if (phase >= 1) cardsVisible = 3;
 
-    if (!clickOverride) {
+    if (Date.now() > clickLockUntil) {
       if (phase === 3) openDetail = 'x';
       else if (phase === 5) openDetail = 'gh';
       else if (phase === 7) openDetail = 'wl';
       else openDetail = null;
     }
 
-    if (phase === 2 || phase === 4 || phase === 6) clickOverride = false;
-    if (phase <= 1) clickOverride = false;
-
     render();
     updateProgress(phase);
+  }
+
+  function stepToTarget() {
+    if (scrollPhase === targetPhase) { stepping = false; return; }
+    const dir = targetPhase > scrollPhase ? 1 : -1;
+    applySinglePhase(scrollPhase + dir);
+    if (scrollPhase === targetPhase) { stepping = false; return; }
+    setTimeout(stepToTarget, 120);
+  }
+
+  function applyScrollPhase(phase) {
+    if (phase === scrollPhase) return;
+    targetPhase = phase;
+    if (!stepping) { stepping = true; stepToTarget(); }
   }
 
   function updateProgress(phase) {
