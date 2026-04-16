@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Liaoran — Your AI Team, Your Local Board</title>
-<meta name="description" content="A local-first project board where AI agents work alongside you — handling daily tasks, processing orders, running marketing campaigns, writing code, and more.">
+<meta name="description" content="AI agents on your board. Tasks, orders, marketing, code, and more.">
 <meta property="og:title" content="Liaoran — Your AI Team, Your Local Board">
 <meta property="og:description" content="A local-first project board where AI agents work alongside you.">
 <meta property="og:type" content="website">
@@ -405,10 +405,13 @@
   }
   .dp-cta-link:hover { background: rgba(94,106,210,0.1); border-color: rgba(94,106,210,0.3); }
   .dp-cta-icon {
-    width: 36px; height: 36px; border-radius: 8px;
+    width: 44px; height: 44px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0; background: rgba(255,255,255,0.06);
+    font-size: 18px; flex-shrink: 0;
   }
+  .dp-cta-icon.icon-x { background: rgba(255,255,255,0.08); }
+  .dp-cta-icon.icon-gh { background: rgba(255,255,255,0.08); }
+  .dp-cta-icon img { width: 22px; height: 22px; }
   .dp-cta-text strong { font-size: 14px; font-weight: 600; color: var(--text-sec); display: block; }
   .dp-cta-text span { font-size: 12px; color: var(--text-f); }
   .dp-cta-arrow { margin-left: auto; font-size: 16px; color: var(--text-g); }
@@ -482,10 +485,10 @@
   <div class="sticky-viewport">
     <!-- Hero layer — on top, fades out -->
     <div class="hero" id="hero">
-      <div class="hero-badge"><span class="badge-dot"></span> Early Access — Coming Soon</div>
-      <h1>Your AI Team,<br><span class="gradient">Your Local Board</span></h1>
-      <p class="hero-sub">A local-first project board where AI agents work alongside you — handling daily tasks, processing orders, running marketing campaigns, writing code, and more.</p>
-      <div class="scroll-cue">↓ Scroll to explore</div>
+      <div class="hero-badge"><span class="badge-dot"></span> <span data-i18n="badge">Early Access — Coming Soon</span></div>
+      <h1 data-i18n="headline">AI Board.<br><span class="gradient">Crystal Clear.</span></h1>
+      <p class="hero-sub" data-i18n="subtitle">AI agents on your board.<br>Tasks, orders, marketing, code, and more.</p>
+      <div class="scroll-cue" data-i18n="scroll">↓ Scroll to explore</div>
     </div>
 
     <!-- Board layer — behind hero, revealed -->
@@ -493,87 +496,87 @@
       <div class="app-window">
         <div class="app-titlebar">
           <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
-          <div class="titlebar-text">Liaoran — Sprint 24</div>
+          <div class="titlebar-text" data-i18n="titlebar">Liaoran — Sprint 24</div>
           <div style="width:44px"></div>
         </div>
         <div class="app-body">
           <div class="sidebar">
             <div class="sb-group">
-              <div class="sb-label">Projects</div>
+              <div class="sb-label" data-i18n="sb_projects">Projects</div>
               <div class="sb-item active"><span class="sb-dot blue"></span> Liaoran</div>
-              <div class="sb-item"><span class="sb-dot green"></span> Side Project</div>
+              <div class="sb-item"><span class="sb-dot green"></span> <span data-i18n="sb_side">Side Project</span></div>
             </div>
             <div class="sb-group">
-              <div class="sb-label">Boards</div>
-              <div class="sb-item active"><span class="sb-dot gray"></span> Sprint 24</div>
-              <div class="sb-item"><span class="sb-dot gray"></span> Backlog</div>
+              <div class="sb-label" data-i18n="sb_boards">Boards</div>
+              <div class="sb-item active"><span class="sb-dot gray"></span> <span data-i18n="sb_sprint">Sprint 24</span></div>
+              <div class="sb-item"><span class="sb-dot gray"></span> <span data-i18n="sb_backlog">Backlog</span></div>
             </div>
             <div class="agent-panel">
-              <div class="sb-label">Agents</div>
-              <div class="agent-row"><span class="ag-dot busy"></span> OrderBot — working</div>
-              <div class="agent-row"><span class="ag-dot on"></span> MarketBot — ready</div>
-              <div class="agent-row"><span class="ag-dot idle"></span> SupportBot — idle</div>
+              <div class="sb-label" data-i18n="sb_agents">Agents</div>
+              <div class="agent-row"><span class="ag-dot busy"></span> <span data-i18n="ag1">OrderBot — working</span></div>
+              <div class="agent-row"><span class="ag-dot on"></span> <span data-i18n="ag2">MarketBot — ready</span></div>
+              <div class="agent-row"><span class="ag-dot idle"></span> <span data-i18n="ag3">SupportBot — idle</span></div>
             </div>
           </div>
           <div class="board" id="board">
             <div class="col">
-              <div class="col-head"><span class="col-name">Todo</span><span class="col-cnt" id="todoCnt">0</span></div>
+              <div class="col-head"><span class="col-name" data-i18n="col_todo">Todo</span><span class="col-cnt" id="todoCnt">0</span></div>
               <div class="col-cards" id="todoCards">
                 <div class="card cta-card cta-x" id="c1">
-                  <div class="card-title">Follow @LiaoranLabs</div>
+                  <div class="card-title" data-i18n="c_follow_x">Follow @LiaoranLabs</div>
                   <div class="card-meta"><span class="s-dot" style="background:var(--pri)"></span><span class="tag tag-blue">community</span></div>
                 </div>
                 <div class="card cta-card cta-gh" id="c2">
-                  <div class="card-title">Follow us on GitHub</div>
+                  <div class="card-title" data-i18n="c_follow_gh">Follow us on GitHub</div>
                   <div class="card-meta"><span class="s-dot" style="background:var(--pri)"></span><span class="tag tag-blue">community</span></div>
                 </div>
                 <div class="card cta-card cta-wl" id="c3">
-                  <div class="card-title">Join the waitlist</div>
+                  <div class="card-title" data-i18n="c_waitlist">Join the waitlist</div>
                   <div class="card-meta"><span class="s-dot" style="background:var(--gold)"></span><span class="tag tag-amber">early access</span></div>
                 </div>
               </div>
             </div>
             <div class="col">
-              <div class="col-head"><span class="col-name">In Progress</span><span class="col-cnt">2</span></div>
+              <div class="col-head"><span class="col-name" data-i18n="col_ip">In Progress</span><span class="col-cnt">2</span></div>
               <div class="col-cards">
                 <div class="card" id="codeCard" style="cursor:pointer;opacity:0.55;transition:all 0.3s">
-                  <div class="card-title">Implement user auth API</div>
-                  <div class="card-meta"><span class="s-dot" style="background:var(--amber);animation:pulse 2s infinite"></span><span class="tag tag-amber">feature</span><span class="agent-badge"><span class="micro"></span>CodeBot</span></div>
+                  <div class="card-title" data-i18n="c_auth">Implement user auth API</div>
+                  <div class="card-meta"><span class="s-dot" style="background:var(--amber);animation:pulse 2s infinite"></span><span class="tag tag-amber" data-i18n="t_feature">feature</span><span class="agent-badge"><span class="micro"></span>CodeBot</span></div>
                   <div class="card-progress"><div class="card-progress-bar amber" id="prog1" style="width:0%"></div></div>
                   <div class="card-activity">
-                    <div class="activity-line" id="al1"><span class="act-icon green">✓</span> Created auth routes</div>
-                    <div class="activity-line" id="al2"><span class="act-icon green">✓</span> Added JWT middleware</div>
-                    <div class="activity-line" id="al3"><span class="act-icon amber">⚙</span> Running tests... <span class="typing"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span></div>
+                    <div class="activity-line" id="al1"><span class="act-icon green">✓</span> <span data-i18n="al1">Created auth routes</span></div>
+                    <div class="activity-line" id="al2"><span class="act-icon green">✓</span> <span data-i18n="al2">Added JWT middleware</span></div>
+                    <div class="activity-line" id="al3"><span class="act-icon amber">⚙</span> <span data-i18n="al3">Running tests...</span> <span class="typing"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span></div>
                   </div>
                 </div>
                 <div class="card dim" id="ipCard2">
-                  <div class="card-title">Schedule social media posts</div>
-                  <div class="card-meta"><span class="s-dot" style="background:var(--amber);animation:pulse 2s infinite"></span><span class="tag tag-blue">marketing</span><span class="agent-badge"><span class="micro"></span>MarketBot</span></div>
+                  <div class="card-title" data-i18n="c_social">Schedule social media posts</div>
+                  <div class="card-meta"><span class="s-dot" style="background:var(--amber);animation:pulse 2s infinite"></span><span class="tag tag-blue" data-i18n="t_marketing">marketing</span><span class="agent-badge"><span class="micro"></span>MarketBot</span></div>
                   <div class="card-activity">
-                    <div class="activity-line" id="al4"><span class="act-icon blue">→</span> Drafting 5 posts for this week</div>
-                    <div class="activity-line" id="al5"><span class="act-icon green">✓</span> 2/5 scheduled</div>
+                    <div class="activity-line" id="al4"><span class="act-icon blue">→</span> <span data-i18n="al4">Drafting 5 posts for this week</span></div>
+                    <div class="activity-line" id="al5"><span class="act-icon green">✓</span> <span data-i18n="al5">2/5 scheduled</span></div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col">
-              <div class="col-head"><span class="col-name">Review</span><span class="col-cnt">1</span></div>
+              <div class="col-head"><span class="col-name" data-i18n="col_review">Review</span><span class="col-cnt">1</span></div>
               <div class="col-cards">
                 <div class="card dim" id="rvCard1">
-                  <div class="card-title">Weekly sales report</div>
+                  <div class="card-title" data-i18n="c_report">Weekly sales report</div>
                   <div class="card-meta"><span class="s-dot" style="background:var(--pri-b)"></span><span class="tag tag-green">report</span></div>
                   <div class="card-activity">
-                    <div class="activity-line" id="al6"><span class="act-icon green">✓</span> Report generated — awaiting review</div>
+                    <div class="activity-line" id="al6"><span class="act-icon green">✓</span> <span data-i18n="al6">Report generated — awaiting review</span></div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="col">
-              <div class="col-head"><span class="col-name">Done</span><span class="col-cnt">3</span></div>
+              <div class="col-head"><span class="col-name" data-i18n="col_done">Done</span><span class="col-cnt">3</span></div>
               <div class="col-cards">
-                <div class="card dim"><div class="card-title">Reply customer inquiries</div><div class="card-meta"><span class="s-dot" style="background:var(--green)"></span><span class="tag tag-green">support</span></div><div class="card-activity"><div class="activity-line show"><span class="act-icon green">✓</span> 8 replies sent by SupportBot</div></div></div>
-                <div class="card dim"><div class="card-title">Update inventory data</div><div class="card-meta"><span class="s-dot" style="background:var(--green)"></span><span class="tag tag-blue">ops</span></div><div class="card-activity"><div class="activity-line show"><span class="act-icon green">✓</span> 142 items synced</div></div></div>
-                <div class="card dim"><div class="card-title">Send campaign emails</div><div class="card-meta"><span class="s-dot" style="background:var(--green)"></span></div><div class="card-activity"><div class="activity-line show"><span class="act-icon green">✓</span> 2,400 emails delivered</div></div></div>
+                <div class="card dim"><div class="card-title" data-i18n="c_reply">Reply customer inquiries</div><div class="card-meta"><span class="s-dot" style="background:var(--green)"></span><span class="tag tag-green" data-i18n="t_support">support</span></div><div class="card-activity"><div class="activity-line show"><span class="act-icon green">✓</span> <span data-i18n="a_reply">8 replies sent by SupportBot</span></div></div></div>
+                <div class="card dim"><div class="card-title" data-i18n="c_inventory">Update inventory data</div><div class="card-meta"><span class="s-dot" style="background:var(--green)"></span><span class="tag tag-blue" data-i18n="t_ops">ops</span></div><div class="card-activity"><div class="activity-line show"><span class="act-icon green">✓</span> <span data-i18n="a_inventory">142 items synced</span></div></div></div>
+                <div class="card dim"><div class="card-title" data-i18n="c_campaign">Send campaign emails</div><div class="card-meta"><span class="s-dot" style="background:var(--green)"></span></div><div class="card-activity"><div class="activity-line show"><span class="act-icon green">✓</span> <span data-i18n="a_campaign">2,400 emails delivered</span></div></div></div>
               </div>
             </div>
             <div class="detail-overlay" id="detailOverlay">
@@ -717,7 +720,7 @@
         <div class="dp-section-label">Description</div>
         <div class="dp-desc">Stay in the loop. We share updates on new features, AI agent capabilities, and the roadmap.</div>
         <a class="dp-cta-link" href="https://x.com/LiaoranLabs" target="_blank">
-          <div class="dp-cta-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
+          <div class="dp-cta-icon icon-x"><img src="x.svg" alt="X" /></div>
           <div class="dp-cta-text"><strong>@LiaoranLabs</strong><span>Follow on X (Twitter)</span></div>
           <span class="dp-cta-arrow">→</span>
         </a>
@@ -733,7 +736,7 @@
         <div class="dp-section-label">Description</div>
         <div class="dp-desc">Follow us on GitHub to get notified when we release. Be the first to know when Liaoran goes live.</div>
         <a class="dp-cta-link" href="https://github.com/liaoranlabs" target="_blank">
-          <div class="dp-cta-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div>
+          <div class="dp-cta-icon icon-gh"><img src="github.svg" alt="GitHub" /></div>
           <div class="dp-cta-text"><strong>liaoranlabs</strong><span>Follow on GitHub</span></div>
           <span class="dp-cta-arrow">→</span>
         </a>
@@ -842,7 +845,7 @@
     heroHidden = phase >= 1;
 
     // Show all 3 cards as soon as board appears
-    if (phase >= 2) cardsVisible = 3;
+    if (phase >= 1) cardsVisible = 3;
 
     if (!clickOverride) {
       if (phase === 3) openDetail = 'x';
@@ -916,6 +919,78 @@
       btn.textContent = 'Error';
       setTimeout(() => { btn.textContent = 'Join'; btn.disabled = false; }, 2000);
     }
+  });
+})();
+
+// ── Language toggle ──
+(function() {
+  const i18n = {
+    en: {
+      badge: 'Early Access — Coming Soon',
+      headline: 'AI Board.<br><span class="gradient">Crystal Clear.</span>',
+      subtitle: 'AI agents on your board.<br>Tasks, orders, marketing, code, and more.',
+      scroll: '↓ Scroll to explore',
+      titlebar: 'Liaoran — Sprint 24',
+      sb_projects: 'Projects', sb_side: 'Side Project',
+      sb_boards: 'Boards', sb_sprint: 'Sprint 24', sb_backlog: 'Backlog',
+      sb_agents: 'Agents',
+      ag1: 'OrderBot — working', ag2: 'MarketBot — ready', ag3: 'SupportBot — idle',
+      col_todo: 'Todo', col_ip: 'In Progress', col_review: 'Review', col_done: 'Done',
+      c_follow_x: 'Follow @LiaoranLabs', c_follow_gh: 'Follow us on GitHub', c_waitlist: 'Join the waitlist',
+      c_auth: 'Implement user auth API', t_feature: 'feature',
+      c_social: 'Schedule social media posts', t_marketing: 'marketing',
+      c_report: 'Weekly sales report',
+      c_reply: 'Reply customer inquiries', t_support: 'support',
+      c_inventory: 'Update inventory data', t_ops: 'ops',
+      c_campaign: 'Send campaign emails',
+      al1: 'Created auth routes', al2: 'Added JWT middleware', al3: 'Running tests...',
+      al4: 'Drafting 5 posts for this week', al5: '2/5 scheduled',
+      al6: 'Report generated — awaiting review',
+      a_reply: '8 replies sent by SupportBot',
+      a_inventory: '142 items synced',
+      a_campaign: '2,400 emails delivered',
+    },
+    zh: {
+      badge: '抢先体验 — 即将上线',
+      headline: 'AI 看板，<br><span class="gradient">一目了然</span>',
+      subtitle: 'AI 智能体在你的看板上工作。<br>日常任务、订单管理、营销推广、编写代码，统统搞定。',
+      scroll: '↓ 滚动探索',
+      titlebar: 'Liaoran — 迭代 24',
+      sb_projects: '项目', sb_side: '副业项目',
+      sb_boards: '看板', sb_sprint: '迭代 24', sb_backlog: '待办池',
+      sb_agents: '智能体',
+      ag1: 'OrderBot — 工作中', ag2: 'MarketBot — 就绪', ag3: 'SupportBot — 空闲',
+      col_todo: '待办', col_ip: '进行中', col_review: '审核', col_done: '已完成',
+      c_follow_x: '关注 @LiaoranLabs', c_follow_gh: '关注我们的 GitHub', c_waitlist: '加入等待列表',
+      c_auth: '实现用户认证 API', t_feature: '功能',
+      c_social: '发布社交媒体内容', t_marketing: '营销',
+      c_report: '周度销售报告',
+      c_reply: '回复客户咨询', t_support: '客服',
+      c_inventory: '更新库存数据', t_ops: '运营',
+      c_campaign: '发送营销邮件',
+      al1: '已创建认证路由', al2: '已添加 JWT 中间件', al3: '运行测试中...',
+      al4: '正在撰写本周 5 篇帖子', al5: '2/5 已排期',
+      al6: '报告已生成 — 等待审核',
+      a_reply: 'SupportBot 已发送 8 条回复',
+      a_inventory: '已同步 142 条数据',
+      a_campaign: '已发送 2,400 封邮件',
+    }
+  };
+
+  let lang = 'en';
+  const toggle = document.querySelector('.lang-toggle');
+
+  function applyLang() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.dataset.i18n;
+      if (i18n[lang][key]) el.innerHTML = i18n[lang][key];
+    });
+    toggle.textContent = lang === 'en' ? '中文' : 'EN';
+  }
+
+  toggle.addEventListener('click', () => {
+    lang = lang === 'en' ? 'zh' : 'en';
+    applyLang();
   });
 })();
 </script>

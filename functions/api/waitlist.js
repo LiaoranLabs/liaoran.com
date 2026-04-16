@@ -1,15 +1,23 @@
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 export async function onRequestGet() {
-  return Response.json({ status: "ok", method: "POST /api/waitlist with { email }" });
+  return json({ status: "ok", method: "POST /api/waitlist with { email }" });
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
-    const { email } = await request.json();
+    const body = await request.json();
+    const email = body && body.email;
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return Response.json({ error: "Invalid email" }, { status: 400 });
+      return json({ error: "Invalid email" }, 400);
     }
 
     await env.DB.prepare(
@@ -18,8 +26,8 @@ export async function onRequestPost(context) {
       .bind(email.toLowerCase().trim())
       .run();
 
-    return Response.json({ ok: true });
+    return json({ ok: true });
   } catch (err) {
-    return Response.json({ error: "Something went wrong" }, { status: 500 });
+    return json({ error: err.message || "Something went wrong" }, 500);
   }
 }
