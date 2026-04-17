@@ -110,8 +110,22 @@
   }
   .badge-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: pulse 2s infinite; }
   .hero h1 {
-    font-size: 52px; font-weight: 800; letter-spacing: -2px;
-    line-height: 1.08; max-width: 650px; margin-bottom: 14px;
+    font-size: 56px; font-weight: 800; letter-spacing: -2.2px;
+    line-height: 1.1; max-width: 720px; margin-bottom: 14px;
+  }
+  .hero h1 .sub-line {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.90em;
+    font-weight: 700;
+    letter-spacing: -1.2px;
+    color: var(--text-m);
+  }
+  .hero h1 .scaffold {
+    font-size: 0.70em;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--text-m);
   }
   .gradient {
     background: linear-gradient(135deg, #7170ff, #0e6cb4, #fab707);
@@ -565,7 +579,7 @@
         <img src="logo.svg" alt="Liaoran" style="width:96px;height:96px" />
         <span style="font-size:36px;font-weight:800;letter-spacing:-1px">Liaoran 了然</span>
       </div>
-      <h1 data-i18n="headline">AI Board.<br><span class="gradient">Crystal Clear.</span></h1>
+    <h1 data-i18n="headline"><span class="scaffold">Be a</span> <span class="gradient">Team of One</span><br><span class="sub-line"><span class="gradient">See it all</span> <span class="scaffold">on Kanban</span></span></h1>
       <p class="hero-sub" data-i18n="subtitle">AI agents on your board.<br>Tasks, orders, marketing, code, and more.</p>
       <div class="scroll-cue" data-i18n="scroll">↓ Scroll to explore</div>
     </div>
@@ -1025,7 +1039,7 @@
   const i18n = {
     en: {
       badge: 'Early Access — Coming Soon',
-      headline: 'AI Board.<br><span class="gradient">Crystal Clear.</span>',
+      headline: '<span class="scaffold">Be a</span> <span class="gradient">Team of One</span><br><span class="sub-line"><span class="gradient">See it all</span> <span class="scaffold">on Kanban</span></span>',
       subtitle: 'AI agents on your board.<br>Tasks, orders, marketing, code, and more.',
       scroll: '↓ Scroll to explore',
       titlebar: 'Liaoran 了然 — Sprint 42',
@@ -1050,12 +1064,12 @@
     },
     zh: {
       badge: '抢先体验 — 即将上线',
-      headline: 'AI 看板，<br><span class="gradient">一目了然</span>',
+      headline: '<span class="gradient">一人</span><span class="scaffold">成团</span><br><span class="sub-line"><span class="scaffold">一目</span><span class="gradient">了然</span></span>',
       subtitle: 'AI 智能体在你的看板上工作。<br>日常任务、订单管理、营销推广、编写代码，统统搞定。',
       scroll: '↓ 滚动探索',
-      titlebar: 'Liaoran — 迭代 24',
+      titlebar: 'Liaoran — 迭代 42',
       sb_projects: '项目', sb_side: '副业项目',
-      sb_boards: '看板', sb_sprint: '迭代 24', sb_backlog: '待办池',
+      sb_boards: '看板', sb_sprint: '迭代 42', sb_backlog: '待办池',
       sb_agents: '智能体',
       ag1: 'OrderBot — 工作中', ag2: 'MarketBot — 就绪', ag3: 'SupportBot — 空闲',
       col_todo: '待办', col_ip: '进行中', col_review: '审核', col_done: '已完成',
@@ -1072,7 +1086,7 @@
       a_reply: 'SupportBot 已发送 8 条回复',
       a_inventory: '已同步 142 条数据',
       a_campaign: '已发送 2,400 封邮件',
-    }
+      }
   };
 
   let lang = 'en';
