@@ -85,9 +85,10 @@
   .hero {
     position: absolute; inset: 0; z-index: 10;
     display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
+    align-items: center; justify-content: flex-start;
     text-align: center;
-    padding: 0 40px;
+    padding: clamp(92px, 12vh, 128px) 40px 0;
+    gap: clamp(18px, 4vh, 34px);
     transition: opacity 0.4s, transform 0.4s;
     pointer-events: auto;
   }
@@ -97,10 +98,41 @@
   }
   .hero::before {
     content: ''; position: absolute;
-    top: -100px; left: 50%; transform: translateX(-50%);
-    width: 800px; height: 500px;
-    background: radial-gradient(ellipse, rgba(94,106,210,0.07) 0%, transparent 70%);
+    top: -140px; left: 50%; transform: translateX(-50%);
+    width: min(980px, 90vw); height: 560px;
+    background: radial-gradient(ellipse, rgba(94,106,210,0.12) 0%, rgba(94,106,210,0.04) 42%, transparent 76%);
     pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 34vh;
+    background: linear-gradient(180deg, rgba(8,9,10,0) 0%, rgba(8,9,10,0.10) 38%, rgba(8,9,10,0.68) 100%);
+    pointer-events: none;
+  }
+  .hero-copy {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 760px;
+  }
+  .hero-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .hero-brand img {
+    width: 96px;
+    height: 96px;
+  }
+  .hero-brand-name {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1px;
   }
   .hero-badge {
     display: inline-flex; align-items: center; gap: 8px;
@@ -137,7 +169,10 @@
   }
   .hero-sub { font-size: 16px; color: var(--text-f); max-width: 460px; line-height: 1.7; }
   .scroll-cue {
-    margin-top: 32px; font-size: 12px; color: var(--text-g);
+    position: relative;
+    z-index: 2;
+    margin-top: 6px;
+    font-size: 12px; color: var(--text-g);
     animation: bounce 2s infinite;
   }
   @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(5px)} }
@@ -145,13 +180,30 @@
   /* ═══ BOARD LAYER (behind hero, revealed when hero fades) ═══ */
   .board-layer {
     position: absolute; inset: 0;
-    padding: 60px 40px 12px; /* top padding for nav */
+    z-index: 4;
+    padding: clamp(260px, 46vh, 390px) 40px 12px; /* sit under the hero slogan */
     display: flex; align-items: flex-start; justify-content: center;
-    opacity: 0; transform: translateY(20px) scale(0.98);
-    transition: opacity 0.5s, transform 0.5s;
+    opacity: 1;
+    transform: translateY(28px) scale(0.97);
+    filter: none;
+    pointer-events: none;
+    transition: transform 0.65s cubic-bezier(0.16,1,0.3,1), padding 0.65s cubic-bezier(0.16,1,0.3,1);
+  }
+  .board-layer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(8,9,10,0.02) 0%, rgba(8,9,10,0) 28%, rgba(8,9,10,0.12) 100%);
+    pointer-events: none;
+    transition: opacity 0.5s ease;
   }
   .board-layer.visible {
-    opacity: 1; transform: translateY(0) scale(1);
+    padding: 60px 40px 12px;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .board-layer.visible::before {
+    opacity: 0;
   }
 
   .app-window {
@@ -159,10 +211,20 @@
     border-radius: 14px;
     border: 1px solid var(--border);
     background: var(--bg);
+    opacity: 0.25;
     overflow: hidden;
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 20px 60px rgba(0,0,0,0.4);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 36px 120px rgba(0,0,0,0.55);
     display: flex; flex-direction: column;
     height: calc(100vh - 72px);
+    transform-origin: center top;
+    transform: perspective(2200px) rotateX(56deg) rotateY(-13deg) rotateZ(9deg) scale(1.06);
+    transition: transform 0.75s cubic-bezier(0.16,1,0.3,1), box-shadow 0.75s cubic-bezier(0.16,1,0.3,1), border-color 0.75s cubic-bezier(0.16,1,0.3,1), opacity 0.75s cubic-bezier(0.16,1,0.3,1);
+    will-change: transform;
+  }
+  .board-layer.visible .app-window {
+    opacity: 1;
+    transform: perspective(2200px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 20px 60px rgba(0,0,0,0.4);
   }
   .app-titlebar {
     display: flex; align-items: center; gap: 8px;
@@ -366,11 +428,11 @@
 
   /* CTA cards */
   .cta-card {
-    opacity: 0; max-height: 0; padding: 0 10px; overflow: hidden;
-    border-color: transparent; margin: 0; transition: none;
+    opacity: 1; max-height: none; padding: 10px; overflow: hidden;
+    margin: 0; transition: filter 0.2s, transform 0.2s, border-color 0.2s;
   }
   .cta-card.creating {
-    animation: cardCreate 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
+    animation: none;
   }
   @keyframes cardCreate {
     0% { opacity: 0; max-height: 0; padding: 0 10px; border-color: transparent; transform: scale(0.95); }
@@ -380,7 +442,7 @@
   .cta-card.cta-gh { border-color: rgba(94,106,210,0.15); background: rgba(94,106,210,0.03); }
   .cta-card.cta-wl { border-color: rgba(250,183,7,0.15); background: rgba(250,183,7,0.03); }
   .cta-card.creating { cursor: pointer; }
-  .cta-card.creating:hover { filter: brightness(1.15); }
+  .cta-card.creating:hover { filter: brightness(1.15); transform: translateY(-1px); }
 
   /* Detail panel */
   .detail-overlay {
@@ -494,12 +556,26 @@
     .nav-link { display: none; }
     .nav-right { gap: 10px; }
 
-    .hero { padding: 0 20px; }
+    .hero { padding: 84px 20px 0; gap: 16px; }
+    .hero-brand { gap: 10px; margin-bottom: 18px; }
+    .hero-brand img { width: 72px; height: 72px; }
+    .hero-brand-name { font-size: 28px; }
     .hero h1 { font-size: 32px; letter-spacing: -1px; }
     .hero-sub { font-size: 14px; }
 
-    .board-layer { padding: 56px 8px 8px; }
-    .app-window { height: calc(100vh - 64px); border-radius: 10px; }
+    .board-layer {
+      padding: min(54vh, 390px) 8px 8px;
+      transform: translateY(22px) scale(0.98);
+    }
+    .board-layer.visible { padding: 56px 8px 8px; }
+    .app-window {
+      height: calc(100vh - 64px);
+      border-radius: 10px;
+      transform: perspective(1800px) rotateX(50deg) rotateY(-8deg) rotateZ(7deg) scale(1.03);
+    }
+    .board-layer.visible .app-window {
+      transform: perspective(1800px) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+    }
 
     .sidebar { display: none; }
     .mobile-agents {
@@ -540,6 +616,11 @@
   @media (max-width: 480px) {
     .hero h1 { font-size: 26px; }
     .hero-badge { font-size: 10px; padding: 4px 10px; }
+    .hero-brand-name { font-size: 24px; }
+    .board-layer { padding-top: min(50vh, 340px); }
+    .app-window {
+      transform: perspective(1500px) rotateX(44deg) rotateY(-6deg) rotateZ(5deg) scale(1.01);
+    }
     .col { min-width: 0; }
     .card-title { font-size: 11px; }
   }
@@ -578,13 +659,15 @@
   <div class="sticky-viewport">
     <!-- Hero layer — on top, fades out -->
     <div class="hero" id="hero">
-      <div class="hero-badge"><span class="badge-dot"></span> <span data-i18n="badge">Early Access — Coming Soon</span></div>
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px">
-        <img src="logo.svg" alt="Liaoran" style="width:96px;height:96px" />
-        <span style="font-size:36px;font-weight:800;letter-spacing:-1px">Liaoran 了然</span>
+      <div class="hero-copy">
+        <div class="hero-badge"><span class="badge-dot"></span> <span data-i18n="badge">Early Access — Coming Soon</span></div>
+        <div class="hero-brand">
+          <img src="logo.svg" alt="Liaoran" />
+          <span class="hero-brand-name">Liaoran 了然</span>
+        </div>
+        <h1 data-i18n="headline"><span class="scaffold">Be a</span> <span class="revgradient">Team of One</span><br><span class="sub-line"><span class="gradient">See it all</span> <span class="scaffold">on Kanban</span></span></h1>
+        <p class="hero-sub" data-i18n="subtitle">AI agents on your board.<br>Tasks, orders, marketing, code, and more.</p>
       </div>
-    <h1 data-i18n="headline"><span class="scaffold">Be a</span> <span class="revgradient">Team of One</span><br><span class="sub-line"><span class="gradient">See it all</span> <span class="scaffold">on Kanban</span></span></h1>
-      <p class="hero-sub" data-i18n="subtitle">AI agents on your board.<br>Tasks, orders, marketing, code, and more.</p>
       <div class="scroll-cue" data-i18n="scroll">↓ Scroll to explore</div>
     </div>
 
@@ -622,17 +705,17 @@
           </div>
           <div class="board" id="board">
             <div class="col">
-              <div class="col-head"><span class="col-name" data-i18n="col_todo">Todo</span><span class="col-cnt" id="todoCnt">0</span></div>
+              <div class="col-head"><span class="col-name" data-i18n="col_todo">Todo</span><span class="col-cnt" id="todoCnt">3</span></div>
               <div class="col-cards" id="todoCards">
-                <div class="card cta-card cta-x" id="c1">
+                <div class="card cta-card cta-x creating" id="c1">
                   <div class="card-title" data-i18n="c_follow_x">Follow @LiaoranLabs</div>
                   <div class="card-meta"><span class="s-dot" style="background:var(--pri)"></span><span class="tag tag-blue">community</span></div>
                 </div>
-                <div class="card cta-card cta-gh" id="c2">
+                <div class="card cta-card cta-gh creating" id="c2">
                   <div class="card-title" data-i18n="c_follow_gh">Follow us on GitHub</div>
                   <div class="card-meta"><span class="s-dot" style="background:var(--pri)"></span><span class="tag tag-blue">community</span></div>
                 </div>
-                <div class="card cta-card cta-wl" id="c3">
+                <div class="card cta-card cta-wl creating" id="c3">
                   <div class="card-title" data-i18n="c_waitlist">Join the waitlist</div>
                   <div class="card-meta"><span class="s-dot" style="background:var(--gold)"></span><span class="tag tag-amber">early access</span></div>
                 </div>
@@ -704,7 +787,7 @@
   const overlay = document.getElementById('detailOverlay');
   const panel = document.getElementById('detailPanel');
 
-  let cardsVisible = 0;
+  let cardsVisible = 3;
   let openDetail = null;
   let heroHidden = false;
   let scrollPhase = -1;
@@ -950,7 +1033,7 @@
     scrollPhase = phase;
     heroHidden = phase >= 1;
 
-    if (phase >= 1) cardsVisible = 3;
+    cardsVisible = 3;
 
     if (Date.now() > clickLockUntil) {
       if (phase === 3) openDetail = 'x';
