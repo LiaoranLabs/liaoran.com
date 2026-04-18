@@ -72,7 +72,7 @@
 
   /* ═══ SINGLE SCROLL DRIVER — hero + board phases all in one ═══ */
   .scroll-driver {
-    height: 700vh;
+    height: 600vh;
     position: relative;
   }
   .sticky-viewport {
@@ -440,6 +440,7 @@
   }
   .cta-card.cta-x { border-color: rgba(94,106,210,0.15); background: rgba(94,106,210,0.03); }
   .cta-card.cta-gh { border-color: rgba(94,106,210,0.15); background: rgba(94,106,210,0.03); }
+  .cta-card.cta-dc { border-color: rgba(88,101,242,0.15); background: rgba(88,101,242,0.03); }
   .cta-card.cta-wl { border-color: rgba(250,183,7,0.15); background: rgba(250,183,7,0.03); }
   .cta-card.creating { cursor: pointer; }
   .cta-card.creating:hover { filter: brightness(1.15); transform: translateY(-1px); }
@@ -506,6 +507,7 @@
   }
   .dp-cta-icon.icon-x { background: rgba(255,255,255,0.08); }
   .dp-cta-icon.icon-gh { background: rgba(255,255,255,0.08); }
+  .dp-cta-icon.icon-dc { background: rgba(88,101,242,0.12); }
   .dp-cta-icon img { width: 22px; height: 22px; }
   .dp-cta-text strong { font-size: 14px; font-weight: 600; color: var(--text-sec); display: block; }
   .dp-cta-text span { font-size: 12px; color: var(--text-f); }
@@ -636,8 +638,6 @@
   <div class="pdot" id="p3"></div>
   <div class="pdot" id="p4"></div>
   <div class="pdot" id="p5"></div>
-  <div class="pdot" id="p6"></div>
-  <div class="pdot" id="p7"></div>
   <span class="progress-label" id="pLabel">scroll ↓</span>
 </div>
 
@@ -705,7 +705,7 @@
           </div>
           <div class="board" id="board">
             <div class="col">
-              <div class="col-head"><span class="col-name" data-i18n="col_todo">Todo</span><span class="col-cnt" id="todoCnt">3</span></div>
+              <div class="col-head"><span class="col-name" data-i18n="col_todo">Todo</span><span class="col-cnt" id="todoCnt">4</span></div>
               <div class="col-cards" id="todoCards">
                 <div class="card cta-card cta-x creating" id="c1">
                   <div class="card-title" data-i18n="c_follow_x">Follow @LiaoranLabs</div>
@@ -714,6 +714,10 @@
                 <div class="card cta-card cta-gh creating" id="c2">
                   <div class="card-title" data-i18n="c_follow_gh">Follow us on GitHub</div>
                   <div class="card-meta"><span class="s-dot" style="background:var(--pri)"></span><span class="tag tag-blue">community</span></div>
+                </div>
+                <div class="card cta-card cta-dc creating" id="c4">
+                  <div class="card-title" data-i18n="c_discord">Join our Discord</div>
+                  <div class="card-meta"><span class="s-dot" style="background:#5865F2"></span><span class="tag tag-blue">community</span></div>
                 </div>
                 <div class="card cta-card cta-wl creating" id="c3">
                   <div class="card-title" data-i18n="c_waitlist">Join the waitlist</div>
@@ -782,22 +786,25 @@
   const c1 = document.getElementById('c1');
   const c2 = document.getElementById('c2');
   const c3 = document.getElementById('c3');
+  const c4 = document.getElementById('c4');
   const codeCard = document.getElementById('codeCard');
   const todoCnt = document.getElementById('todoCnt');
   const overlay = document.getElementById('detailOverlay');
   const panel = document.getElementById('detailPanel');
 
-  let cardsVisible = 3;
+  let cardsVisible = 4;
   let openDetail = null;
   let heroHidden = false;
   let scrollPhase = 0;
   let clickLockUntil = 0;
 
-  const cards = [c1, c2, c3];
-  const cardKeys = ['x', 'gh', 'wl'];
+  // DOM order: c1 (X), c2 (GH), c4 (Discord), c3 (Waitlist)
+  const cards = [c1, c2, c4, c3];
+  const cardKeys = ['x', 'gh', 'dc', 'wl'];
   const cardBorderColors = [
     'rgba(94,106,210,0.35)',
     'rgba(94,106,210,0.35)',
+    'rgba(88,101,242,0.35)',
     'rgba(250,183,7,0.35)'
   ];
 
@@ -926,6 +933,22 @@
           <span class="dp-cta-arrow">→</span>
         </a>
       </div>`,
+    dc: `
+      <div class="dp-header">
+        <div class="dp-status ready"><span class="s-dot" style="background:#5865F2"></span> Ready</div>
+        <div class="dp-title">Join our Discord</div>
+        <div class="dp-labels"><span class="dp-label" style="background:rgba(88,101,242,0.14);color:#9aa3ff">community</span></div>
+      </div>
+      <div class="dp-sep"></div>
+      <div class="dp-body">
+        <div class="dp-section-label">Description</div>
+        <div class="dp-desc">Hang out with the community. Share feedback, swap agent recipes, and get early product updates.</div>
+        <a class="dp-cta-link" href="https://discord.gg/3FKswCTzFp" target="_blank">
+          <div class="dp-cta-icon icon-dc"><img src="discord.svg" alt="Discord" /></div>
+          <div class="dp-cta-text"><strong>LiaoranLabs</strong><span>Join on Discord</span></div>
+          <span class="dp-cta-arrow">→</span>
+        </a>
+      </div>`,
     wl: `
       <div class="dp-header">
         <div class="dp-status gold"><span class="s-dot" style="background:var(--gold)"></span> Early Access</div>
@@ -991,13 +1014,20 @@
   }
 
   function openCardDetail(key) {
+    clearTimeout(detailSwapTimer);
     openDetail = key;
     clickLockUntil = Date.now() + 800;
     stepping = false;
     render();
   }
 
-  function closeDetail() { openDetail = null; clickLockUntil = Date.now() + 800; stepping = false; render(); }
+  function closeDetail() {
+    clearTimeout(detailSwapTimer);
+    openDetail = null;
+    clickLockUntil = Date.now() + 800;
+    stepping = false;
+    render();
+  }
 
   // Click handlers
   cards.forEach((c, i) => {
@@ -1016,34 +1046,51 @@
   overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDetail(); });
 
   function getPhase(frac) {
-    if (frac < 0.06) return 0;   // hero
-    if (frac < 0.18) return 1;   // board appears (no detail)
-    if (frac < 0.30) return 2;   // all cards visible
-    if (frac < 0.45) return 3;   // x detail
-    if (frac < 0.55) return 4;   // close x
-    if (frac < 0.70) return 5;   // gh detail
-    if (frac < 0.80) return 6;   // close gh
-    return 7;                     // wl detail
+    if (frac < 0.05) return 0;   // hero
+    if (frac < 0.18) return 1;   // board visible (no detail)
+    if (frac < 0.38) return 2;   // x detail
+    if (frac < 0.58) return 3;   // gh detail
+    if (frac < 0.78) return 4;   // discord detail
+    return 5;                    // wl detail
   }
 
   let stepping = false;
   let targetPhase = 0;
+  let detailSwapTimer = null;
+  const phaseToDetail = { 2: 'x', 3: 'gh', 4: 'dc', 5: 'wl' };
+  const SWAP_CLOSE_MS = 300; // time to let old panel slide out before opening next
 
   function applySinglePhase(phase) {
     scrollPhase = phase;
     heroHidden = phase >= 1;
+    cardsVisible = 4;
+    updateProgress(phase);
 
-    cardsVisible = 3;
+    if (Date.now() <= clickLockUntil) { render(); return; }
 
-    if (Date.now() > clickLockUntil) {
-      if (phase === 3) openDetail = 'x';
-      else if (phase === 5) openDetail = 'gh';
-      else if (phase === 7) openDetail = 'wl';
-      else openDetail = null;
+    // Only commit an open-detail on the final stepping tick. Intermediate
+    // ticks null it out so a fast scroll doesn't flash every card on the way.
+    const isFinalStep = (phase === targetPhase);
+    const next = isFinalStep ? (phaseToDetail[phase] || null) : null;
+
+    clearTimeout(detailSwapTimer);
+
+    // If we're swapping from one open detail to another, close first, then
+    // schedule the new one so the user sees a clean slide-out/slide-in.
+    if (openDetail && next && openDetail !== next) {
+      openDetail = null;
+      render();
+      detailSwapTimer = setTimeout(() => {
+        if (Date.now() <= clickLockUntil) return;
+        if (scrollPhase !== phase) return; // user scrolled past; bail
+        openDetail = next;
+        render();
+      }, SWAP_CLOSE_MS);
+      return;
     }
 
+    openDetail = next;
     render();
-    updateProgress(phase);
   }
 
   function stepToTarget() {
@@ -1061,7 +1108,7 @@
   }
 
   function updateProgress(phase) {
-    for (let i = 0; i <= 7; i++) {
+    for (let i = 0; i <= 5; i++) {
       const d = document.getElementById('p' + i);
       if (!d) continue;
       d.className = 'pdot' + (i < phase ? ' done' : i === phase ? ' active' : '');
@@ -1135,7 +1182,7 @@
       sb_agents: 'Agents',
       ag1: 'OrderBot — working', ag2: 'MarketBot — ready', ag3: 'SupportBot — idle',
       col_todo: 'Todo', col_ip: 'In Progress', col_review: 'Review', col_done: 'Done',
-      c_follow_x: 'Follow @LiaoranLabs', c_follow_gh: 'Follow us on GitHub', c_waitlist: 'Join the waitlist',
+      c_follow_x: 'Follow @LiaoranLabs', c_follow_gh: 'Follow us on GitHub', c_discord: 'Join our Discord', c_waitlist: 'Join the waitlist',
       c_auth: 'Implement user auth API', t_feature: 'feature',
       c_social: 'Schedule social media posts', t_marketing: 'marketing',
       c_report: 'Weekly sales report',
@@ -1152,7 +1199,7 @@
     zh: {
       badge: '抢先体验 — 即将上线',
       headline: '<span class="revgradient">一人</span><span class="scaffold">成团</span><br><span class="sub-line"><span class="scaffold">一目</span><span class="gradient">了然</span></span>',
-      subtitle: 'AI 智能体在你的看板上工作。<br>日常任务、订单管理、营销推广、编写代码，统统搞定。',
+      subtitle: '与 AI 组队。<br>日常任务、订单管理、营销推广、编写代码，统统搞定。',
       scroll: '↓ 滚动探索',
       titlebar: 'Liaoran — 迭代 42',
       sb_projects: '项目', sb_side: '副业项目',
@@ -1160,7 +1207,7 @@
       sb_agents: '智能体',
       ag1: 'OrderBot — 工作中', ag2: 'MarketBot — 就绪', ag3: 'SupportBot — 空闲',
       col_todo: '待办', col_ip: '进行中', col_review: '审核', col_done: '已完成',
-      c_follow_x: '关注 @LiaoranLabs', c_follow_gh: '关注我们的 GitHub', c_waitlist: '加入等待列表',
+      c_follow_x: '关注 @LiaoranLabs', c_follow_gh: '关注我们的 GitHub', c_discord: '加入 Discord 社群', c_waitlist: '加入等待列表',
       c_auth: '实现用户认证 API', t_feature: '功能',
       c_social: '发布社交媒体内容', t_marketing: '营销',
       c_report: '周度销售报告',
