@@ -167,6 +167,16 @@
     background: linear-gradient(135deg, #7170ff, #0e6cb4, #fab707);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
+
+  /* .gradientStart {
+     background: linear-gradient(45deg, var(--text-m), #fab707 );
+     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .gradientEnd {
+     background: linear-gradient(45deg, #fab707, var(--text-m) );
+     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  */
   .hero-sub { font-size: 16px; color: var(--text-f); max-width: 460px; line-height: 1.7; }
   .scroll-cue {
     position: relative;
@@ -666,8 +676,9 @@
           <img src="logo.svg" alt="Liaoran" />
           <span class="hero-brand-name">Liaoran 了然</span>
         </div>
-        <h1 data-i18n="headline"><span class="scaffold">Be a</span> <span class="revgradient">Team of One</span><br><span class="sub-line"><span class="gradient">See it all</span> <span class="scaffold">on Kanban</span></span></h1>
-        <p class="hero-sub" data-i18n="subtitle">AI agents on your board.<br>Tasks, orders, marketing, code, and more.</p>
+        <h1 data-i18n="headline">
+            <span class="scaffold gradientStart">Be a</span> <span class="revgradient">Team of One</span><br><span class="sub-line"><span class="gradient">See it all</span> <span class="scaffold gradientEnd">& Get Things Done</span></span>
+        </h1> <p class="hero-sub" data-i18n="subtitle">AI agents on your board.<br>Tasks, orders, marketing, code, and more.</p>
       </div>
       <div class="scroll-cue" data-i18n="scroll">↓ Scroll to explore</div>
     </div>
@@ -1174,7 +1185,7 @@
   const i18n = {
     en: {
       badge: 'Early Access — Coming Soon',
-      headline: '<span class="scaffold">Be a</span> <span class="gradient">Team of One</span><br><span class="sub-line"><span class="gradient">See it all</span> <span class="scaffold">on Kanban</span></span>',
+      headline: '<span class="scaffold gradientStart">Be a</span> <span class="revgradient">Team of One</span><br><span class="sub-line"><span class="gradient">See it all</span> <span class="scaffold gradientEnd">& Get Things Done</span></span>',
       subtitle: 'AI agents on your board.<br>Tasks, orders, marketing, code, and more.',
       scroll: '↓ Scroll to explore',
       titlebar: 'Liaoran 了然 — Sprint 42',
